@@ -9,16 +9,42 @@ import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import GoogleIcon from "@mui/icons-material/Google";
 import SportsSoccerIcon from "@mui/icons-material/SportsSoccer";
+import { useFormik } from "formik";
+import * as yup from "yup";
 
-export default function Login() {
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get("email"),
-      password: data.get("password"),
-    });
-  };
+// Definir el esquema de validación con Yup
+const validationSchema = yup.object({
+  email: yup.string().email("Ingresa un email válido").required("Email es requerido"),
+  password: yup
+    .string()
+    .min(8, "La contraseña debe tener al menos 8 caracteres")
+    .required("Contraseña es requerida"),
+});
+
+// Definir una interfaz para los valores del formulario
+interface FormValues {
+  email: string;
+  password: string;
+}
+
+const Login: React.FC = () => {
+  const {
+    handleSubmit,
+    handleChange,
+    handleBlur,
+    values,
+    touched,
+    errors,
+  } = useFormik({
+    initialValues: {
+      email: "",
+      password: "",
+    },
+    validationSchema: validationSchema,
+    onSubmit: (values: FormValues) => {
+      alert(JSON.stringify(values, null, 2));
+    },
+  });
 
   return (
     <Container component="main" maxWidth="xs">
@@ -31,55 +57,58 @@ export default function Login() {
         }}
       >
         <Avatar sx={{ m: 1, bgcolor: "primary.main", width: 56, height: 56 }}>
-          <SportsSoccerIcon
-            style={{
-              fontSize: 60,
-            }}
-          />
+          <SportsSoccerIcon style={{ fontSize: 60 }} />
         </Avatar>
         <Typography component="h1" variant="h5">
           Sign in
         </Typography>
-        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+        <form onSubmit={handleSubmit}>
+          {/* Campo de email */}
           <TextField
-            margin="normal"
-            required
+            sx={{ mt: 2 }}
             fullWidth
             id="email"
-            label="Email Address"
             name="email"
-            autoComplete="email"
-            autoFocus
+            label="Email"
+            value={values.email}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            error={touched.email && Boolean(errors.email)}
+            helperText={touched.email && errors.email}
           />
+          
+          {/* Campo de contraseña */}
           <TextField
-            margin="normal"
-            required
+            sx={{ mt: 2 }}
             fullWidth
+            id="password"
             name="password"
             label="Password"
             type="password"
-            id="password"
-            autoComplete="current-password"
+            value={values.password}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            error={touched.password && Boolean(errors.password)}
+            helperText={touched.password && errors.password}
           />
+          
+          {/* Botón de enviar */}
           <Button type="submit" fullWidth variant="contained" sx={{ mt: 2 }}>
             Ingresar
           </Button>
-          {/* button login with google, with icon google */}
+          
+          {/* Botón de ingresar con Google */}
           <Button
-            type="submit"
             fullWidth
             variant="contained"
+            style={{ backgroundColor: "#f44242", color: "white" }}
             sx={{ mt: 2, mb: 2 }}
-            startIcon={
-              <GoogleIcon
-                style={{
-                  color: "white",
-                }}
-              />
-            }
+            startIcon={<GoogleIcon style={{ color: "white" }} />}
           >
             Ingresar con Google
           </Button>
+          
+          {/* Enlaces adicionales */}
           <Grid container>
             <Grid item xs>
               <Link href="#" variant="body2">
@@ -92,8 +121,10 @@ export default function Login() {
               </Link>
             </Grid>
           </Grid>
-        </Box>
+        </form>
       </Box>
     </Container>
   );
-}
+};
+
+export default Login;
